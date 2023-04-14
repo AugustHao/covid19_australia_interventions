@@ -5894,7 +5894,9 @@ reff_model_data <- function(
   ascertainment_level_for_immunity = NULL,
   impute_infection_with_CAR = FALSE,
   PCR_only_states = NULL,
-  state_specific_right_truncation = TRUE
+  state_specific_right_truncation = TRUE,
+  cutoff_is_manual = FALSE,
+  manual_cutoff_dates = NULL
 ) {
   
   linelist_date <- max(linelist_raw$date_linelist)
@@ -5996,10 +5998,37 @@ reff_model_data <- function(
       adjust_for_lag = FALSE)
   }
 
+  #manual input cutoff dates
+  if (cutoff_is_manual) {
+    
+    #set default manual cutoff to be jurisdiction specific
+    if (is.null(manual_cutoff_dates)) {
+      manual_cutoff_dates <- c((linelist_date-days(5)),
+                               (linelist_date-days(5)),
+                               (linelist_date-days(9)),
+                               (linelist_date-days(5)),
+                               (linelist_date-days(5)),
+                               (linelist_date-days(5)),
+                               (linelist_date-days(5)),
+                               (linelist_date-days(9)))
+      
+      names(manual_cutoff_dates) <- states
+    }
+    
+    #fake detectable matrix with manual cutoffs
+    detectable <- sapply(manual_cutoff_dates,
+                                      FUN = function(x){
+                                        #recall the manual input dates are onset
+                                        #dates so shift by 5 before to get
+                                        #infection
+                                        full_dates <= (x - days(5))
+                                      })
+    
+  } else {
+    # subset to dates with reasonably high detection probabilities in some states
+    detectable <- completion_prob_mat >= detection_cutoff
+  }
   
-  
-  # subset to dates with reasonably high detection probabilities in some states
-  detectable <- completion_prob_mat >= detection_cutoff
   
   # the last date with infection data we include
   last_detectable_idx <- apply(detectable, 2, sum)
@@ -6144,6 +6173,7 @@ reff_model_data <- function(
   short_completion_prob_mat <- completion_prob_mat[dates_select,]
   short_CAR_matrix <- CAR_matrix[dates_select,]
   short_valid_mat <- valid_mat[dates_select,]
+  short_detectable_mat <- detectable[dates_select,]
   
   #load immunity effect
   vaccine_effect_timeseries <- readRDS(immunity_effect_path)
@@ -6249,6 +6279,7 @@ reff_model_data <- function(
     detection_prob_mat = short_detection_prob_mat,
     completion_prob_mat = short_completion_prob_mat,
     valid_mat = short_valid_mat,
+    data_inclusion_mat = short_detectable_mat,
     states = states,
     dates = list(
       infection = dates,
@@ -7592,7 +7623,8 @@ write_local_cases <- function(model_data, dir = "outputs", suffix = NULL) {
     count = as.vector(model_data$local$cases_infectious)*as.vector(model_data$dow_effect),
     infections = round(as.vector(model_data$local$infectiousness)*as.vector(model_data$dow_effect)),
     acquired_in_state = as.vector(model_data$local$cases),
-    dow_effect = as.vector(model_data$dow_effect)
+    dow_effect = as.vector(model_data$dow_effect),
+    is_included = as.vector(model_data$data_inclusion_mat)
   )%>% write.csv(
     file.path(dir,paste0("local_cases_input_", suffix, format(model_data$dates$linelist, "%Y-%m-%d"), ".csv")),
     row.names = FALSE

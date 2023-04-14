@@ -13,7 +13,8 @@ local_cases <- tibble::tibble(
   completion_probability = as.vector(data$completion_prob_mat),
   state = rep(data$states, each = data$n_dates),
   count = as.vector(data$local$cases_infectious),
-  acquired_in_state = as.vector(data$local$cases)
+  acquired_in_state = as.vector(data$local$cases),
+  is_included = as.vector(data$valid_mat)
 ) 
 
 local_cases <- local_cases %>% left_join(new_infections_by_test_type,
@@ -32,6 +33,13 @@ lc_long <- local_cases %>% na.omit() %>%
 
 lc_long%>%
   filter(completion_probability>=0.8,completion_probability<=1) ->check_lc_long
+
+manual_cutoff_line <- lc_long %>%
+  filter(type == "count") %>%
+  filter(is_included == TRUE) %>%
+  group_by(state) %>%
+  filter(date_onset == max(date_onset)) %>%
+  select(state,date_onset)
 
 prob_line_95 <- lc_long %>%
   filter(type == "count") %>%
@@ -70,18 +78,20 @@ lc_long %>%
     data = prob_line_95,
     aes(
       xintercept = date_onset
-    )
+    ),
+    col = "black"
   ) +
-  # geom_vline(
-  #   data = prob_line_90,
-  #   aes(
-  #     xintercept = date_onset
-  #   )
-  # ) +
+  geom_vline(
+    data = manual_cutoff_line,
+    aes(
+      xintercept = date_onset
+    ),
+    col = "purple"
+  ) +
   facet_wrap(
     facets = vars(state),
     ncol = 2,
     scales = "free_y"
   )
 
-ggsave("outputs/figures/watermelon_completion.png", bg = 'white',height = 5,width = 9)
+ggsave("outputs/figures/watermelon_completion_with_manual_cutoff.png", bg = 'white',height = 5,width = 9)

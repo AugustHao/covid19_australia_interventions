@@ -180,7 +180,8 @@ saveRDS(linelist,"outputs/imputed_linelist.RDS")
 data <- reff_model_data(linelist_raw = linelist,
                         notification_delay_cdf = NULL,
                         impute_infection_with_CAR = TRUE,
-                        state_specific_right_truncation = TRUE)
+                        state_specific_right_truncation = TRUE, 
+                        cutoff_is_manual = TRUE)
 #data[["valid_mat"]][c(919,920),"QLD"] <- FALSE
 saveRDS(data, "outputs/pre_loaded_reff_data.RDS")
 #data <- readRDS("outputs/pre_loaded_reff_data.RDS")
