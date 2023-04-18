@@ -6107,7 +6107,7 @@ reff_model_data <- function(
     )
   
   # correct for seasonality in local infectious numbers
-  local_cases_infectious <- local_cases_infectious / dow_effect
+  local_cases_infectious <- local_cases_infectious #/ dow_effect
   
   # those imported (only considered infectious, but with a different Reff)
   imported_cases <- linelist %>%
@@ -6536,15 +6536,22 @@ reff_model <- function(data, TP_obj = NULL) {
   # work out which elements to exclude (because there were no infectious people)
   valid <- which(data$valid_mat, arr.ind = TRUE)
   
-  #vectorise dow effect and remove invalid
-  dow_effect <- data$dow_effect[valid]
+  #construct dirichlet prior for dow effect
+  
+  dow_alpha <- normal(1, 1, truncation = c(0, Inf), dim = c(1, 7))
+  #matrix(1,nrow = 1, ncol = 7)
+  dow_dist <- dirichlet(dow_alpha, n_realisations = data$n_states)
+  #normalise multiplier to average to 1
+  dow_weights <- dow_dist * 7
+  dow_mult <- t(dow_weights[, data$dates$dow])
+
   # combine everything as vectors, excluding invalid datapoints (remove invalid
   # elements here, otherwise it causes a gradient issue)
   R_eff_loc <- exp(log_R_eff_loc[1:data$n_dates, ])
   R_eff_imp <- exp(log_R_eff_imp[1:data$n_dates, ])
   new_from_loc_vec <- data$local$infectiousness[valid] * R_eff_loc[valid]
   new_from_imp_vec <- data$imported$infectiousness[valid] * R_eff_imp[valid]
-  expected_infections_vec <- (new_from_loc_vec + new_from_imp_vec) * dow_effect
+  expected_infections_vec <- (new_from_loc_vec + new_from_imp_vec) * dow_mult[valid]
   
   # negative binomial likelihood for number of cases
   sqrt_inv_size <- normal(0, 0.5, truncation = c(0, Inf), dim = data$n_states)
@@ -6588,6 +6595,8 @@ reff_model <- function(data, TP_obj = NULL) {
       log_R_eff_loc,
       log_R_eff_imp,
       epsilon_L,
+      dow_weights,
+      dow_mult,
       log_R0 = TP_obj$log_R0,
       log_Qt = TP_obj$log_Qt,
       distancing_effect = TP_obj$distancing_effect,
