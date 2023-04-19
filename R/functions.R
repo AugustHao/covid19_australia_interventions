@@ -6538,11 +6538,16 @@ reff_model <- function(data, TP_obj = NULL) {
   
   #construct dirichlet prior for dow effect
   
-  dow_alpha <- normal(1, 1, truncation = c(0, Inf), dim = c(1, 7))
-  #matrix(1,nrow = 1, ncol = 7)
-  dow_dist <- dirichlet(dow_alpha, n_realisations = data$n_states)
-  #normalise multiplier to average to 1
-  dow_weights <- dow_dist * 7
+  # dow_alpha <- normal(1, 1, truncation = c(0, Inf), dim = c(1, 7))
+  # #matrix(1,nrow = 1, ncol = 7)
+  # dow_dist <- dirichlet(dow_alpha, n_realisations = data$n_states)
+  # #normalise multiplier to average to 1
+  # dow_weights <- dow_dist * 7
+  
+  ###aleternative normal dist version?
+  
+  dow_dist <- normal(1, 0.075, truncation = c(0, Inf), dim = c(8, 7))
+  dow_weights <- sweep(dow_dist, 1, rowMeans(dow_dist), FUN="/")
   dow_mult <- t(dow_weights[, data$dates$dow])
 
   # combine everything as vectors, excluding invalid datapoints (remove invalid
