@@ -175,7 +175,7 @@ reff_plotting(
   refitted_model,
   dir = "outputs",
   subdir = "figures/one_month",
-  min_date = refitted_model$data$dates$latest_mobility - days(30),
+  min_date = refitted_model$data$dates$latest_mobility - days(44),
   sims = sims
 )
 
@@ -185,7 +185,7 @@ reff_plotting(
   refitted_model,
   dir = "outputs",
   subdir = "figures/one_month/no_nowcast",
-  min_date = refitted_model$data$dates$latest_mobility - days(30),
+  min_date = refitted_model$data$dates$latest_mobility - days(44),
   max_date = refitted_model$data$dates$latest_infection,
   sims = sims,
   mobility_extrapolation_rectangle = FALSE
