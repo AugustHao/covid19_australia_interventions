@@ -463,12 +463,12 @@ p <- ggplot(plot_prop_one_sym_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
   ggtitle(
-    label = paste0("Percentage of respondents who reported at least one symptom")
+    label = paste0("Percentage of respondents who reported at least one \nsymptom")
   ) +
   ylab(paste0("Estimate of percentage reporting symptoms"))
 
@@ -516,12 +516,12 @@ p <- ggplot(plot_prop_one_core_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
   ggtitle(
-    label = paste0("Percentage of respondents who reported at least one core symptom")
+    label = paste0("Percentage of respondents who reported at least one \ncore symptom")
   ) +
   ylab(paste0("Estimate of percentage reporting symptoms"))
 
@@ -1142,12 +1142,12 @@ p_at_least_one_core_states <- ggplot(plot_one_core_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
   ggtitle(
-    label = paste0("Percentage of respondents who reported seeking a test due to symptoms, \n given at least one core symptom")
+    label = paste0("Percentage of respondents who reported seeking a test due \nto symptoms, given at least one core symptom")
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 
@@ -1195,12 +1195,12 @@ p_at_least_one_sym_states <- ggplot(plot_one_sym_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
   ggtitle(
-    label = paste0("Percentage of respondents who reported seeking a test due to symptoms, \n given at least one symptom")
+    label = paste0("Percentage of respondents who reported seeking a test due \nto symptoms, given at least one symptom")
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 
@@ -1257,7 +1257,7 @@ p <- ggplot(one_sym_comb) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1316,7 +1316,7 @@ p <- ggplot(one_core_comb) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1388,7 +1388,7 @@ cases %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1446,7 +1446,7 @@ cases %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1631,7 +1631,7 @@ p <- plot_one_core_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1686,7 +1686,7 @@ p <- plot_one_sym_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1851,7 +1851,7 @@ p <- plot_one_core_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -1906,7 +1906,7 @@ p <- plot_one_sym_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 9)
+        axis.text.x = element_text(size = 8)
   ) +
   
   # and titles
@@ -2029,7 +2029,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 10)
+        axis.text.x = element_text(size = 8)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed.png"))
@@ -2076,7 +2076,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 10)
+        axis.text.x = element_text(size = 8)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_national.png"))
@@ -2117,7 +2117,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 10)
+        axis.text.x = element_text(size = 8)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_national_RAT_only.png"))
@@ -2175,7 +2175,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 10)
+        axis.text.x = element_text(size = 8)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_PCR_only.png"))
@@ -2232,7 +2232,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 10)
+        axis.text.x = element_text(size = 8)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_RAT_only.png"))
