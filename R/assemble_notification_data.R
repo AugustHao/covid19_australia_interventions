@@ -178,6 +178,23 @@ for (week_iter in seq_along(mondays_to_fix)) {
   
 }
 
+#deal with NSW Labour day exception where all RAT tests for Sat-Mon were reported on Tuesday.
+#PCR appears to have been reported on Mon and is therefore fine to use normal function  
+for (week_iter in seq_along(mondays_to_fix)) {  
+  
+  if (mondays_to_fix[week_iter] == "2023-06-12") {
+    #missing full RAT from Sat-Sun,so take cases from Tuesday instead
+    #disaggregate RAT dates
+    linelist <- stagger_dates_in_linelist(linelist = linelist,
+                                          state_select = "NSW",
+                                          test_type = "RAT",
+                                          dates_to =   c(saturdays_to_fix[week_iter],
+                                                         sundays_to_fix[week_iter],
+                                                         mondays_to_fix[week_iter]),
+                                          date_from = tuesdays_to_fix[week_iter])
+  }
+}
+
 
 #truncate for jurisdictions with incomplete reporting days (only PCR or RAT)
 linelist <- linelist %>% 
