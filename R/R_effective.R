@@ -7,7 +7,7 @@ set.seed(2020-04-29)
 source("R/functions.R")
 
 # sync up the case data
-sync_nndss()
+#sync_nndss()
 
 # overhead arg for TP constant boolean choice
 const_TP <- TRUE
@@ -21,10 +21,10 @@ data <- reff_model_data(linelist_raw = linelist,
                         start_date = as_date("2021-06-01"),
                         immunity_effect_path = "outputs/combined_effect_full.RDS",
                         ascertainment_level_for_immunity = 0.5,
-                        PCR_only_states = NULL,
+                        impute_infection_with_CAR = FALSE,
+                        PCR_only_states = c("VIC", "QLD", "NSW", "WA", "NT"),
                         state_specific_right_truncation = TRUE)
                         
-
 #check data date
 data$dates$linelist
 data$dates$earliest
@@ -65,9 +65,6 @@ OC_0 <- fitted_model$greta_arrays$distancing_effect$OC_0
 
 infectious_days <- infectious_period(gi_cdf)
 
-
-
-
 #get TP params 
 fitted_TP_params <- fitted_model$greta_arrays$TP_params
 
@@ -100,8 +97,6 @@ if (const_TP) {
   predicted_TP_obj$R_eff_loc_1[] <- 1
 }
 
-
-
 #fit reff-only model
 system.time(
   
@@ -114,12 +109,10 @@ system.time(
 
 # save the fitted model object
 saveRDS(refitted_model, "outputs/fitted_reff_only_model.RDS")
-# saveRDS(refitted_model, "outputs/fitted_full_reff_model.RDS")
-# refitted_model <- readRDS("outputs/fitted_reff_only_model.RDS")
+#refitted_model <- readRDS("outputs/fitted_reff_only_model.RDS")
 
 # # visual checks of model fit
 # plot_reff_checks(fitted_model)
-
 
 # output Reff trajectory draws for Rob M
 write_reff_sims(refitted_model, 
@@ -180,7 +173,8 @@ reff_plotting(
 )
 
 
-# most recent month no nowcast
+# most recent month no nowcast 
+#at the moment hack change of setting the scale_x_date(limits = as.Date(c('xxxx-xx-xx', 'xxxx-xx-xx'))) in plot_trend function to fix x-axis scale
 reff_plotting(
   refitted_model,
   dir = "outputs",
@@ -191,9 +185,9 @@ reff_plotting(
   mobility_extrapolation_rectangle = FALSE
 )
 
-
 # most recent six months no nowcast
-reff_plotting(
+#at the moment hack change of manually setting the scale_x_date(limits = as.Date(c('xxxx-xx-xx', 'xxxx-xx-xx'))) in plot_trend function fixes x-axis scale
+reff_plotting(  
   refitted_model,
   dir = "outputs",
   subdir = "figures/six_month/no_nowcast",

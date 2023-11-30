@@ -48,6 +48,7 @@ source("R/microdistancing_change.R")
 # trend estimates (macrodistancing_trends.RDS). Can be run concurrently with
 # microdistancing model (i.e. on a separate process/machine) [~10h]
 # macro takes half a day to run so best to do on Mondays
+#update instruction
 source("R/macrodistancing_change.R")
 # -- figure to Mediaflux / Freya
 
@@ -61,19 +62,17 @@ source("R/survey_analysis_slack.R")
 #  produces notification date by state plots for the most recent 28 days
 # optionally, produce NINDSS only watermelon plot
 
-
 # 5. Read in and process NINDSS data
 
 # NINDSS linelist 
 # read in the full linelist
 linelist_full <- load_linelist(use_vic = FALSE,
                                use_nsw = TRUE,
-                               date = as_date("2023-02-16"))
+                               date = as_date("2023-07-12"))
 
 #read in the last 6 months only updates
 linelist <- load_linelist(use_vic = FALSE, use_nsw = FALSE) 
 #cutoff date
-
 #NNDSS has somehow been giving us incomplete days worth of cases at the start of the weekly (six month updates) linelists
 #calculate number of cases on each day in both linelists and find the oldest day where both linelists match to use as the cutoff date
 #because of NSW being loaded from different data there may not be many matching days. If this is the case, exclude NSW from the summaries
@@ -94,18 +93,24 @@ linelist <- linelist %>%
   bind_rows(linelist_full %>% 
               filter(date_confirmation < cutoff_date | state == "NSW"))
 
+#fix WA onset dates that are not correct - anything marked No or NA in the symptoms_reported column 
+#has an inferred onset date that needs to be removed. Once that is done remove the symptoms_reported column
+linelist$date_onset[(linelist$state == "WA" & linelist$symptoms_reported == "No" )] <- NA
+linelist$date_onset[(linelist$state == "WA" & is.na(linelist$symptoms_reported))] <- NA
+linelist <- linelist[,-12]
+
 # remove dubious SA onset dates that are dated to same as confirmation dates
 linelist$date_onset[(linelist$state == "SA" & linelist$date_onset >= as_date("2022-02-27"))] <- NA
 
 #cut off impossible early RATs that could cause date misalignment
+#filtered by date TGA approved RATs in Australia
 linelist <- linelist %>% 
   filter(
     !(test_type == "RAT" & 
-            date_confirmation < as_date("2021-01-01"))
+            date_confirmation <= as_date("2021-11-01"))
          )
 
 #check min & max dates
-
 min_date <- min(linelist$date_confirmation)
 min_date
 (max_date <- max(linelist$date_confirmation))
@@ -115,7 +120,6 @@ linelist <- linelist %>% filter(date_confirmation >= "2020-01-23")
 
 #fix future dates problem
 linelist <- linelist %>% filter(date_confirmation <= max(date_linelist))
-
 
 # #fix one off qld error
 # linelist <- linelist %>% mutate(date_confirmation = case_when(

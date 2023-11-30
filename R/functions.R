@@ -1543,6 +1543,7 @@ plot_trend <- function(
     multistate = FALSE,
     hline_at = 1,
     ylim = c(0, 6),
+    #xlim = c(NA, max_data_date),
     ybreaks = NULL,
     intervention_at = interventions(),
     projection_at = NA,
@@ -1680,7 +1681,7 @@ plot_trend <- function(
     
     coord_cartesian(ylim = ylim) +
     y_scale +
-    scale_x_date(date_breaks = date_breaks, date_minor_breaks = date_minor_breaks, date_labels = date_labels) +
+    scale_x_date(date_breaks = date_breaks, date_minor_breaks = date_minor_breaks, date_labels = date_labels) + # limits = as.Date(c("2023-05-20", "2023-11-20"))) +
     scale_alpha(range = c(0, 0.5)) +
     scale_fill_manual(values = c("Nowcast" = base_colour)) +
     
@@ -1747,7 +1748,7 @@ plot_trend <- function(
                xmax = max(df$date),
                ymin = -Inf,
                ymax = Inf,
-               fill = grey(0.5), alpha = 0.1)
+               fill = grey(0.5), alpha = 0.2)
   }
   
   p    
@@ -4766,7 +4767,8 @@ get_nndss_linelist <- function(
                  state_of_acquisition,
                  state_of_residence,
                  interstate_import_cvsi,
-                 test_type
+                 test_type,
+                 symptoms_reported = CV_SYMPTOMS_REPORTED
                )
       
   }  else {
@@ -4782,11 +4784,19 @@ get_nndss_linelist <- function(
         postcode_of_residence,
         state_of_acquisition,
         state_of_residence,
-        interstate_import_cvsi
+        interstate_import_cvsi,
+        symptoms_reported = CV_SYMPTOMS_REPORTED
       )
   }
-  
-  
+    
+linelist <- linelist %>% 
+  mutate(
+    symptoms_reported = case_when(
+    symptoms_reported == "1" ~ "Yes",
+    symptoms_reported == "1" ~ "Yes",
+    symptoms_reported == "1" ~ "Yes",
+    TRUE ~ NA)
+    )
   
 linelist <- linelist %>%
     mutate(
@@ -5367,7 +5377,7 @@ get_vic_linelist <- function(file) {
 
 #function to get summary form of Vic data
 get_vic_summary_count <- function(date = NULL,
-                                  new_format = TRUE) {
+                                  new_format = FALSE) {
   #read files
   vic.files <- list.files("~/not_synced/vic/",pattern = "count", full.names = TRUE)
   #get dates
@@ -6050,7 +6060,7 @@ reff_model_data <- function(
       PCR_CAR_reduction_mat[full_dates >= as_date("2022-01-01"),
                             PCR_only] <- matrix(PCR_only_CAR_reduction_factor,
                                                 nrow = sum(full_dates >= as_date("2022-01-01")),
-                                                ncol = 1,
+                                                ncol = 5,
                                                 byrow = TRUE)
       
       PCR_only_CAR_mat <- CAR_matrix * PCR_CAR_reduction_mat
@@ -6086,36 +6096,56 @@ reff_model_data <- function(
   
   # include day of the week glm to smooth weekly report artefact
   
-  #subset to omicron period
-  week_count <- 1 + 1:length(seq(linelist_start_date, latest_date, by = 1)) %/% 7
-  
-  dow <- lubridate::wday(seq(linelist_start_date, latest_date, by = 1))
+  #subset to last five months or so (Nov 2023)
+  week_count <- 1 + 1:length(seq(as_date("2023-05-29"), latest_date, by = 1)) %/% 7 
+  dow <- lubridate::wday(seq(as_date("2023-05-29"), latest_date, by = 1))
   
   dow_effect <- local_cases
   dow_effect[] <- 1
   
-  dow_effect[full_dates>=linelist_start_date,] <- apply(local_cases[full_dates>=linelist_start_date,],
-                                                        2,
-                                                        FUN = function(x){
-                                                          m <- glm(
-                                                            x ~ factor(week_count) + factor(dow),
-                                                            family = stats::poisson
-                                                          )
-                                                          trend_estimate <- tibble(
-                                                            week_count = 1,
-                                                            dow = dow
-                                                          ) %>%
-                                                            mutate(
-                                                              effect = predict(
-                                                                m,
-                                                                newdata = .,
-                                                                type = "response"
-                                                              ),
-                                                              effect = effect / mean(effect[1:7])
+  #apply dow to a subset of local cases (most recent five months or so)
+  dow_effect[full_dates>=as_date("2023-05-29"),] <- apply(local_cases[full_dates>=as_date("2023-05-29"),],
+                                                          2,
+                                                          FUN = function(x){
+                                                            m <- glm(
+                                                              x ~ factor(week_count) + factor(dow),
+                                                              family = stats::poisson
                                                             )
-                                                          trend_estimate$effect}
+                                                            trend_estimate <- tibble(
+                                                              week_count = 1,
+                                                              dow = dow
+                                                            ) %>%
+                                                              mutate(
+                                                                effect = predict(
+                                                                  m,
+                                                                  newdata = .,
+                                                                  type = "response"
+                                                                ),
+                                                                effect = effect / mean(effect[1:7])
+                                                              )
+                                                            trend_estimate$effect}
   )
   
+  #extract weekly estimates for each state and apply to entire date range
+  #reduce it to start on a Monday
+  dow_effect_head <- dow_effect_head <- dow_effect[1:3,]
+  dow_effect <- dow_effect[-c(1:3),]
+  
+  pattern_rows <- dow_effect[1247:1253,]
+  
+  # Initialize a new matrix
+  dow_old <- matrix(NA, nrow = 1246, ncol = ncol(dow_effect))
+  colnames(dow_old) <- colnames(dow_effect)
+  
+  # Replicate the pattern in sets of seven to fill the new matrix
+  for (i in seq_len(nrow(dow_old))) {
+    pattern_index <- ((i - 1) %% 7) + 1
+    dow_old[i, ] <- pattern_rows[pattern_index, ]
+  }
+  
+  dow_effect <- dow_effect[-c(1:1246),]
+  
+  dow_effect <- rbind(dow_effect_head, dow_old, dow_effect)
   
   # and those infected in any state, but infectious in this one
   local_cases_infectious <- linelist %>%
@@ -7098,6 +7128,7 @@ reff_plotting <- function(
   # rugplot of case counts
   case_data <- local_cases_long %>%
     filter(date >= min_date) %>%
+    #filter(date <= max_data_date) %>% 
     mutate(
       type = "Nowcast",
       height = 1
@@ -10104,7 +10135,7 @@ fit_survey_gam <- function(
   m <- mgcv::gam(
     cbind(count, I(respondents - count)) ~ s(date_num) + intervention_stage,
     select = TRUE,
-    family = stats::binomial,optimizer = c('outer',"optim")
+    family = stats::binomial,optimizer = c('outer',"nlm")
   )
   
   
@@ -14131,6 +14162,13 @@ get_CAR_matrix <- function(dates = full_dates,
              )
    
     #Add quick drop off in Dec 2021 
+    CAR_smooth <- CAR_smooth %>% 
+      mutate(test_prob_given_infection = 
+               case_when(
+                 date == as.Date("2021-12-14") ~ 0.33,
+                 TRUE ~ test_prob_given_infection)
+      )
+    
     CAR_smooth <- CAR_smooth %>% 
       mutate(test_prob_given_infection = 
                case_when(

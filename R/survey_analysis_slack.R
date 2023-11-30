@@ -91,6 +91,8 @@ parse_doh_survey_for_test_seeking <- function(filename) {
            test == "Yes – COVID-19" ~ "Yes", 
            test == "Yes – Both COVID-19 and Influenza" ~ "Yes", 
            test == "Yes – Influenza" ~ "No", 
+           test == "7" ~ "No", 
+           test == "8" ~ "Yes",
            grepl("No", test) ~ "No",
           test == "Prefer not to say" ~ "No", 
           TRUE ~ test),
@@ -522,7 +524,7 @@ p <- ggplot(plot_prop_one_sym_state) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -534,12 +536,12 @@ p <- ggplot(plot_prop_one_sym_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
   ggtitle(
-    label = paste0("Percentage of respondents who reported at least one symptom")
+    label = paste0("Percentage of respondents who reported at least one \nsymptom")
   ) +
   ylab(paste0("Estimate of percentage reporting symptoms"))
 
@@ -575,7 +577,7 @@ p <- ggplot(plot_prop_one_core_state) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -587,7 +589,7 @@ p <- ggplot(plot_prop_one_core_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -747,7 +749,7 @@ p <- ggplot(plot_one_core) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%m/%y") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   cowplot::theme_cowplot() +
@@ -796,7 +798,7 @@ p <- ggplot(plot_one_sym) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%m/%y") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   cowplot::theme_cowplot() +
@@ -972,7 +974,7 @@ p <- ggplot(plot_one_core_type) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%m/%y") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   cowplot::theme_cowplot() +
@@ -1022,7 +1024,7 @@ p <- ggplot(plot_one_sym_type) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%m/%y") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   cowplot::theme_cowplot() +
@@ -1201,7 +1203,7 @@ p_at_least_one_core_states <- ggplot(plot_one_core_state) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1213,7 +1215,7 @@ p_at_least_one_core_states <- ggplot(plot_one_core_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1254,7 +1256,7 @@ p_at_least_one_sym_states <- ggplot(plot_one_sym_state) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1266,7 +1268,7 @@ p_at_least_one_sym_states <- ggplot(plot_one_sym_state) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1316,7 +1318,7 @@ p <- ggplot(one_sym_comb) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1328,7 +1330,7 @@ p <- ggplot(one_sym_comb) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1375,7 +1377,7 @@ p <- ggplot(one_core_comb) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1387,7 +1389,7 @@ p <- ggplot(one_core_comb) +
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1505,7 +1507,7 @@ cases %>%
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 month", date_labels = "%m/%y") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1517,7 +1519,7 @@ cases %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1690,7 +1692,7 @@ p <- plot_one_core_state_type %>%
   
   #coord_cartesian(ylim = c(0, 50)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1702,7 +1704,7 @@ p <- plot_one_core_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1745,7 +1747,7 @@ p <- plot_one_sym_state_type %>%
   
   #coord_cartesian(ylim = c(0, 30)) +
   scale_y_continuous(position = "right")+ #, breaks = seq(0,30,5)) +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1757,7 +1759,7 @@ p <- plot_one_sym_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1910,7 +1912,7 @@ p <- plot_one_core_state_type %>%
   
   coord_cartesian(ylim = c(0, 60)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1922,7 +1924,7 @@ p <- plot_one_core_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -1965,7 +1967,7 @@ p <- plot_one_sym_state_type %>%
   
   coord_cartesian(ylim = c(0, 50)) +
   scale_y_continuous(position = "right")+ #, breaks = seq(0,30,5)) +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
@@ -1977,7 +1979,7 @@ p <- plot_one_sym_state_type %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   
   # and titles
@@ -2090,7 +2092,7 @@ results %>%
   xlab(element_blank()) +
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
   cowplot::theme_cowplot() +
   cowplot::panel_border(remove = TRUE) +
@@ -2100,7 +2102,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed.png"))
@@ -2138,7 +2140,7 @@ results %>%
   xlab(element_blank()) +
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   cowplot::theme_cowplot() +
   cowplot::panel_border(remove = TRUE) +
   theme(legend.position = "bottom",
@@ -2147,7 +2149,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_national.png"))
@@ -2179,7 +2181,7 @@ results %>%
   xlab(element_blank()) +
   coord_cartesian(ylim = c(0, 50)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   cowplot::theme_cowplot() +
   cowplot::panel_border(remove = TRUE) +
   theme(legend.position = "bottom",
@@ -2188,7 +2190,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_national_RAT_only.png"))
@@ -2236,7 +2238,7 @@ results %>%
   xlab(element_blank()) +
   coord_cartesian(ylim = c(0, 30)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
   cowplot::theme_cowplot() +
   cowplot::panel_border(remove = TRUE) +
@@ -2246,7 +2248,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_PCR_only.png"))
@@ -2293,7 +2295,7 @@ results %>%
   xlab(element_blank()) +
   coord_cartesian(ylim = c(0, 50)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "2 months", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %y") +
   facet_rep_wrap(~state, ncol = 2, scales = "free_y",repeat.tick.labels = TRUE) +
   cowplot::theme_cowplot() +
   cowplot::panel_border(remove = TRUE) +
@@ -2303,7 +2305,7 @@ results %>%
         strip.text = element_text(hjust = 0, face = "bold"),
         axis.title.y.right = element_text(vjust = 0.5, angle = 90),
         panel.spacing = unit(1.2, "lines"),
-        axis.text.x = element_text(size = 8)
+        axis.text.x = element_text(size = 9)
   ) +
   ylab(paste0("Estimate of percentage tested \n due to symptoms"))
 save_ggplot(paste0("at_least_one_sym_states_central_smoothed_RAT_only.png"))
@@ -2318,7 +2320,17 @@ results %>%
 #### P(reported positive RAT test|tested positive on RAT) = n(reported positive RAT test AND tested positive on RAT) / n(tested positive on RAT) ####
 # Due to symptoms only
 
-report_positive_rat_week <- survey_data %>%
+report_positive_rat_week <- survey_data %>% #filter out states that no longer have rat reporting pipelines after it gets switched off
+  filter(
+    !(state == "VIC" & date > "2023-07-14")) %>%
+  filter (
+   !(state == "QLD" & date > "2023-09-14")) %>%
+  filter (
+    !(state == "NSW" & date > "2023-10-14")) %>%
+  filter (
+    !(state == "WA" & date > "2023-10-22")) %>%
+  filter (
+    !(state == "NT" & date > "2023-11-04")) %>%
   mutate(rat_result = case_when( 
     grepl("positive", rat_result) ~ "RAT Positive", 
     grepl("negative", rat_result) ~ "RAT Negative", 
@@ -2432,7 +2444,7 @@ p <- ggplot(plot_report_positive_rat) +
   
   geom_errorbar(
     aes(date, percentage, ymin = lower, ymax = upper),
-    size = 5,
+    size = 3,
     alpha = 0.2,
     width = 0
   ) +
@@ -2441,7 +2453,7 @@ p <- ggplot(plot_report_positive_rat) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "month", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "2 month", date_labels = "%b %y") +
   scale_alpha(range = c(0, 0.5)) +
   cowplot::theme_cowplot() +
   cowplot::panel_border(remove = TRUE) +
@@ -2494,6 +2506,15 @@ report_positive_rat_week_state <- survey_data %>%
   select(-No) %>%
   mutate(proportion = count / respondents)
 
+#check if all states are present for last week of data and if not hack in 0 responses so we get an estimate for that week 
+sort(unique(report_positive_rat_week$wave_date))
+report_positive_rat_week_state$state[report_positive_rat_week_state$wave_date == latest_survey_date]
+
+#report_positive_rat_week_state <- rbind(report_positive_rat_week_state, list('2023-09-14', 'VIC', 0, 0, 0.0000000))
+#report_positive_rat_week_state <- rbind(report_positive_rat_week_state, list('2023-09-21', 'NT', 0, 0, 0.0000000))
+#report_positive_rat_week_state <- rbind(report_positive_rat_week_state, list('2023-09-21', 'TAS', 0, 0, 0.0000000))
+#report_positive_rat_week_state <- rbind(report_positive_rat_week_state, list('2023-09-21', 'WA', 0, 0, 0.0000000))
+
 # Aggregate over aggregate_over weeks
 report_positive_rat_week_state_rolling <- function(data) {
   
@@ -2517,7 +2538,8 @@ report_positive_rat_weekly_data_state <- function(data) {
     ungroup() %>%
     mutate(
       proportion = count / respondents,
-      percentage = proportion * 100
+      percentage = proportion * 100, 
+      fill = 0
     ) %>%
     rename(date = wave_date)
   
@@ -2564,7 +2586,14 @@ report_positive_rat_weekly_data_state <- function(data) {
   
 }
 
-plot_report_positive_rat_state_roll <- report_positive_rat_weekly_data_state(report_positive_rat_week_state_roll) %>% filter(state %in% c("NSW","VIC"))
+plot_report_positive_rat_state_roll <- report_positive_rat_weekly_data_state(report_positive_rat_week_state_roll) %>% filter(state %in% c("QLD", "NSW", "VIC", "WA"))
+
+#hack in fix for Victoria
+plot_report_positive_rat_state_roll$percentage[plot_report_positive_rat_state_roll$state == "VIC" & plot_report_positive_rat_state_roll$date >= "2023-09-28" & plot_report_positive_rat_state_roll$date <=  "2023-10-05"] <- 0.000000
+plot_report_positive_rat_state_roll$upper[plot_report_positive_rat_state_roll$state == "VIC" & plot_report_positive_rat_state_roll$date >= "2023-09-28" & plot_report_positive_rat_state_roll$date <=  "2023-10-05"] <- 50.000000
+
+plot_report_positive_rat_state_roll$percentage[plot_report_positive_rat_state_roll$state == "VIC" & plot_report_positive_rat_state_roll$date >= "2023-11-09" & plot_report_positive_rat_state_roll$date <= latest_survey_date] <- 0.000000
+plot_report_positive_rat_state_roll$upper[plot_report_positive_rat_state_roll$state == "VIC" & plot_report_positive_rat_state_roll$date >= "2023-11-09" & plot_report_positive_rat_state_roll$date <= latest_survey_date] <- 50.000000
 
 p <- ggplot(plot_report_positive_rat_state_roll) +
   # add calculated proportions converted to percentages
@@ -2584,16 +2613,18 @@ p <- ggplot(plot_report_positive_rat_state_roll) +
   
   geom_errorbar(
     aes(date, percentage, ymin = lower, ymax = upper),
-    size = 5,
+    size = 3,
     alpha = 0.2,
     width = 0
   ) +
+  
+  #geom_vline(xintercept = as.Date("2023-07-01"), linetype="dashed")+
   
   xlab(element_blank()) +
   
   coord_cartesian(ylim = c(0, 100)) +
   scale_y_continuous(position = "right") +
-  scale_x_date(date_breaks = "month", date_labels = "%d/%m") +
+  scale_x_date(date_breaks = "3 month", date_labels = "%b%y") +
   scale_alpha(range = c(0, 0.5)) +
   facet_wrap(~state, ncol = 1, scales = "free") +
   cowplot::theme_cowplot() +
@@ -2614,7 +2645,7 @@ p <- ggplot(plot_report_positive_rat_state_roll) +
   ylab(paste0("Estimate of percentage reported result, \n given positive RAT"))
 
 p
-filepath <- file.path("outputs/figures/", "report_positive_rat_nsw_vic.png")
+filepath <- file.path("outputs/figures/", "report_positive_rat_vic_nsw_qld.png")
 ggsave(filepath,
        width = 10,
        height = 8,

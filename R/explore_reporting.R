@@ -13,20 +13,19 @@ true_count_quantile <- function(observed_count, probability, quantiles = c(0.05,
 
 # which linelists to load/evaluate (could automate this better)
 
-
 retrospective.linelists <- c(
-  "2023-06-08",
-  "2023-06-15","2023-06-22",
-  "2023-06-29","2023-07-06",
-  "2023-07-13",
-  "2023-07-20",
-  "2023-07-27", "2023-08-03"
-  
+  "2023-09-14",
+  "2023-09-21",
+  "2023-09-28", "2023-10-05", 
+  "2023-10-12", "2023-10-19",
+  "2023-10-26", 
+  "2023-11-02",
+  "2023-11-09"
 )
 ndates <- length(retrospective.linelists)
 
 # Specify most recent file
-latest.file.date <- "2023-08-10"
+latest.file.date <- "2023-11-23"
 
 #detect.limit <- 0.95
 detect.limit <- 0.05
@@ -98,9 +97,7 @@ latest.ll.all <- latest.ll.all %>%
 # create folder for this week (using most recent linelist file)
 dir.create(paste0("outputs/reporting_delay/",latest.file.date))
 
-
 plot.these.dates <- sort(ymd(retrospective.linelists), decreasing = TRUE)[1:6]
-
 
 for (the.state in c("ACT","NSW","NT","QLD","SA","TAS","VIC","WA")){
   
@@ -111,14 +108,17 @@ for (the.state in c("ACT","NSW","NT","QLD","SA","TAS","VIC","WA")){
   
   latest.ll <- latest.ll.all %>%
     filter(state == the.state)
-  
-  
+   
+  completion_date <- as_date(min(latest.ll$date_onset[latest.ll$completion_probability <1]))  
+                             
   dat %>%
     ggplot() +
     aes(x = date_onset) +
     
     geom_col(data = latest.ll, aes(x = date_onset, y = inf.count), fill = "grey80") +
     geom_col(data = latest.ll, aes(x = date_onset, y = count), fill = "grey60") +
+    
+    geom_vline(xintercept = completion_date) +
     
     geom_point(aes(y = count), pch = 21, fill = "firebrick", size = 2) +
     geom_errorbar(aes(ymin = L, ymax = U), col = "steelblue3", width = 0) +
@@ -129,11 +129,14 @@ for (the.state in c("ACT","NSW","NT","QLD","SA","TAS","VIC","WA")){
     facet_wrap(~as.factor(data.date), ncol = 2) +
     cowplot::theme_cowplot()
   
-  ggsave(paste0("outputs/reporting_delay/",latest.file.date,"/",tolower(the.state),"_reporting_delay_",latest.file.date,".png"), height = 12, width = 10, units = "in", bg = "white")
+  ggsave(paste0("outputs/reporting_delay/",latest.file.date,"/",tolower(the.state),"_reporting_delay_",latest.file.date,".pdf"), height = 12, width = 10, units = "in", bg = "white")
   
   
   # The ratio plots, where inferred counts at the time are scaled by the 'inferred'
   # counts in the most recent data (i.e., truth), should be ~1
+  
+
+  
   dat %>%
     select(date_onset, data.date, count, inf.count, L, U) %>%
     left_join(latest.ll %>% select(date_onset, count, inf.count, L, U), by = c("date_onset")) %>%
@@ -144,8 +147,12 @@ for (the.state in c("ACT","NSW","NT","QLD","SA","TAS","VIC","WA")){
     geom_hline(yintercept = 1, colour = "grey70") +
     geom_hline(yintercept = 0.5, colour = "grey90", lty = 2) +
     
+    geom_vline(xintercept = completion_date) +
+    
     geom_point(aes(y = count.ratio), pch =21, fill = "firebrick") +
     geom_point(aes(y = inf.count.ratio), pch =21, fill = "steelblue3") +
+    
+    
     
     ggtitle(the.state) +
     scale_y_continuous("Ratio of data at time to current data") +
@@ -154,7 +161,7 @@ for (the.state in c("ACT","NSW","NT","QLD","SA","TAS","VIC","WA")){
     facet_wrap(~data.date, ncol = 2) +
     cowplot::theme_cowplot()
   
-  ggsave(paste0("outputs/reporting_delay/",latest.file.date,"/",tolower(the.state),"_reporting_delay_",latest.file.date,"_ratio.png"), height = 12, width = 10, units = "in", bg = "white")
+  ggsave(paste0("outputs/reporting_delay/",latest.file.date,"/",tolower(the.state),"_reporting_delay_",latest.file.date,"_ratio.pdf"), height = 12, width = 10, units = "in", bg = "white")
 }
 
 

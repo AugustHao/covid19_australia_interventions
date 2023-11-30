@@ -11,8 +11,8 @@ plot_linelist_by_confirmation_date(linelist = linelist)
 #load all summary format data
 summary_data <- get_summary_data(states = "VIC")
 
-#visually check for issues - at the moment there is a spike of cases on the 22nd July 2023 that we need to check for
-summary_data %>% filter(date>=(max(summary_data$date)-days(30))) %>% 
+#visually check for issues
+summary_data %>% filter(date>=(max(summary_data$date)-days(90))) %>% 
   ggplot(aes(x = date, y = cases, fill = test_type)) + 
   geom_col(position = "dodge") + 
   facet_wrap(~state,scales = "free")
@@ -55,28 +55,12 @@ linelist <- replace_linelist_bits_with_summary(linelist,
 #check if ACT is properly joined
 plot_linelist_by_confirmation_date(linelist = linelist, date_cutoff = "2022-01-01")
 
-
 #make watermelon style checking plot
 plot_linelist_by_confirmation_date(linelist = linelist)
 ggsave("outputs/figures/case_count_by_confirmation.png", bg = 'white',height = 5,width = 9)
 
-
-#check that there is still a data spike for Victoria on the 22nd of July 2023. If so, run this section of code. 
-plot_linelist_by_confirmation_date(linelist = linelist) #modify to cover longer period as date gets further away
-#remove cases with data confirmation as the 22nd of July for Victoria
-linelist <- linelist %>% 
-  filter(
-    !(state == "VIC" & 
-        date_confirmation == as_date("2023-07-22"))
-  )
-#add in the correct cases (distributed every which where)
-vic_cases_22_07_2023 <- readRDS("outputs/vic_cases_22_07_2023.rds")
-linelist <- rbind(linelist, vic_cases_22_07_2023)
-
-
 #impute correct confirmation dates for NSW RAT weekend cases dumped on Monday and other issues with reporting delays
 nsw_wrong_RATs_period <- seq.Date(as.Date("2023-02-25"),max(linelist$date_confirmation),by = "day")
-
 
 mondays_to_fix <- nsw_wrong_RATs_period[wday(nsw_wrong_RATs_period) == 2]
 tuesdays_to_fix <- nsw_wrong_RATs_period[wday(nsw_wrong_RATs_period) == 3]
@@ -87,6 +71,25 @@ wednesdays_to_fix <- nsw_wrong_RATs_period[wday(nsw_wrong_RATs_period) == 4]
 #lovely long if else statement to sort out the problematic cases
 for (week_iter in seq_along(mondays_to_fix)) {
   
+# NT not reporting PCR cases on weekends anymore - dumped on Monday. Stagger out
+  if(mondays_to_fix[week_iter] >= "2023-11-13") {
+    #shift all PCR cases to Monday
+    linelist <- linelist %>% 
+      mutate(date_confirmation = case_when(
+        date_confirmation %in% c(saturdays_to_fix[week_iter],
+                                 sundays_to_fix[week_iter]) & 
+          test_type == "PCR" & 
+          state == "NT" ~ mondays_to_fix[week_iter],
+        TRUE ~ date_confirmation))
+    #shift PCR dates back in place via disaggregation
+    linelist <- stagger_dates_in_linelist(linelist = linelist,
+                                          state_select = "NT",
+                                          test_type = "PCR",
+                                          dates_to = c(saturdays_to_fix[week_iter],
+                                                       sundays_to_fix[week_iter]),
+                                          date_from = mondays_to_fix[week_iter],
+                                          use_delay_cdf = FALSE)
+  }
 #Victorian PCR reporting down on 9th and partially down on 10th of July. Cases reported on 12th of July instead
    if (mondays_to_fix[week_iter] == "2023-07-10") {
     #shift all PCR cases to Wednesday
@@ -257,27 +260,26 @@ for (week_iter in seq_along(mondays_to_fix)) {
                                           date_from = mondays_to_fix[week_iter])
     }
   }
-  
 }}}
 
 #truncate for jurisdictions with incomplete reporting days (only PCR or RAT)
 #NOTE NT cases are now so low that there may actually be 0 cases of one type. Visually check the NT before running this. 
-linelist <- linelist %>% 
-  group_by(date_confirmation,state) %>% 
-  mutate(type_count = length(unique(test_type))) %>% 
-  ungroup() %>% 
-  filter(type_count == 2 | 
-         date_confirmation <= (max(linelist$date_confirmation) - weeks(1)) |
-         state == "NSW") %>%
+#linelist <- linelist %>% 
+ # group_by(date_confirmation,state) %>% 
+  #mutate(type_count = length(unique(test_type))) %>% 
+  #ungroup() %>% 
+  #filter(type_count == 2 | 
+   #      date_confirmation <= (max(linelist$date_confirmation) - weeks(1)) |
+    #     state == "NSW") %>%
   #the date filter is necessary to avoid removing pre RAT era cases
-  select(!type_count)
+  #select(!type_count)
 #check if any last day appears to have incomplete reporting
 plot_linelist_by_confirmation_date(linelist = linelist)
 
 #drop the latest reporting day for some jurisdictions if incomplete 
 #typically this is SA due to data uploaded on extraction day
 linelist <- linelist %>% 
-  filter(date_confirmation < (max(linelist$date_confirmation)) | state != "QLD")
+  filter(date_confirmation < (max(linelist$date_confirmation)-1) | state != "WA")
 
 plot_linelist_by_confirmation_date(linelist = linelist)
 #plot the confirmation plot again after all the fixes
@@ -291,6 +293,33 @@ ggsave("outputs/figures/case_count_by_confirmation_post_processing_6months.png",
        height = 5,
        width = 9)
 
+linelist <- linelist %>% filter( 
+  !(test_type == "RAT" & 
+      state == "VIC" &
+      date_confirmation > "2023-06-30")) %>%
+  filter(!(test_type == "RAT" & 
+             state == "QLD" &
+             date_confirmation > "2023-08-31")) %>%
+  filter(!(test_type == "RAT" & 
+             state == "NSW" &
+             date_confirmation > "2023-09-30")) %>%
+  filter(!(test_type == "RAT" & 
+             state == "WA" &
+             date_confirmation > "2023-10-08")) %>%
+  filter(!(test_type == "RAT" & 
+             state == "NT" &
+             date_confirmation > "2023-10-21"))
+  
+#save processed linelist before imputation for new reff model  
+saveRDS(
+  linelist,
+  sprintf(
+    "outputs/processed_linelist_%s.RDS",
+    linelist$date_linelist[1] %>%
+      format.Date(format = "%Y%m%d")
+  )
+)
+
 #record the days of lag for each jurisdiction
 state_date_lag <- linelist %>% 
   group_by(state) %>% 
@@ -299,14 +328,11 @@ state_date_lag <- linelist %>%
   mutate(days_lag = max(last_date) - last_date,
          days_lag = as.numeric(days_lag))
 
-
 state_date_lag
 #doublecheck date range
 linelist %>% pull(date_confirmation) %>% range()
 
-
 #use NSW part of the linelist to get delay cdfs for different test modes
-
 #cut off date at the beginning of RAT reporting
 # delay_to_consider_date_cutoff <- as_date("2022-01-06")
 # latest_symptom_survey_cutoff <- as_date("2023-03-21")
@@ -358,17 +384,17 @@ data <- reff_model_data(linelist_raw = linelist,
                         notification_delay_cdf = NULL,
                         impute_infection_with_CAR = TRUE,
                         state_specific_right_truncation = TRUE,
-                        PCR_only_states = c('VIC'),
-                        PCR_only_CAR_reduction_factor = c(0.27))
+                        PCR_only_states = c('VIC', "QLD", "NSW", "WA", "NT"),
+                        PCR_only_CAR_reduction_factor = c(0.27, 0.32, 0.5, 0.34, 0.29))
 #data[["valid_mat"]][c(919,920),"QLD"] <- FALSE
 saveRDS(data, "outputs/pre_loaded_reff_data.RDS")
 #data <- readRDS("outputs/pre_loaded_reff_data.RDS")
 
 #remove PCR cases from Victoria for watermelon plot so as not to confuse James
+PCR_states <- c("VIC", "QLD", "NSW", "WA", "NT")
 linelist <- linelist %>% filter( 
   !(test_type == "RAT" & 
-      state == "VIC")
-)
+      state %in% PCR_states))
 
 source("R/watermelon_plot_completion.R")
 
@@ -379,22 +405,3 @@ write_local_cases(data)
 
 source("R/explore_reporting.R")
 
-#make PCR only version - in dev
-
-# 
-# data <- reff_model_data(linelist_raw = linelist %>% filter(test_type == "PCR"),
-#                         notification_delay_cdf = NULL,
-#                         impute_infection_with_CAR = TRUE,
-#                         state_specific_right_truncation = TRUE)
-# #data[["valid_mat"]][c(919,920),"QLD"] <- FALSE
-# saveRDS(data, "outputs/pre_loaded_reff_data_PCR_only.RDS")
-# #data <- readRDS("outputs/pre_loaded_reff_data_old_imputation.RDS")
-# 
-# source("R/watermelon_plot_completion.R")
-# 
-#  if (!dir.exists("outputs/PCR_only_local_cases")) {
-#    dir.create("outputs/PCR_only_local_cases")
-#  }
-# 
-# write_local_cases(data, dir = "outputs/PCR_only_local_cases",suffix = "PCR_only")
-# 
